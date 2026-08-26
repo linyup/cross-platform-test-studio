@@ -45,7 +45,17 @@ def main() -> int:
     run_parser.add_argument("--package")
     run_parser.add_argument("--wda-url", default="http://127.0.0.1:8100")
     run_parser.add_argument("--bundle-id")
+    serve_parser = subparsers.add_parser("serve")
+    serve_parser.add_argument("--flow", type=Path, default=Path("examples/create-note.flow.json"))
+    serve_parser.add_argument("--host", default="127.0.0.1")
+    serve_parser.add_argument("--port", type=int, default=4174)
     args = parser.parse_args()
+
+    if args.command == "serve":
+        from .web import serve
+
+        serve(args.flow, args.host, args.port)
+        return 0
 
     flow = Flow.from_dict(json.loads(args.flow.read_text(encoding="utf-8")))
     if args.command == "validate":

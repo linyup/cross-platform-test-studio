@@ -6,7 +6,7 @@
 
 ## 工程实践界面
 
-以下截图展示基于同一套 Flow 思路实现的完整工程实践界面。公开仓库聚焦可复用的 Flow 协议、Runner 和平台 Driver，不包含截图中的全部可视化产品代码。
+以下截图展示基于同一套 Flow 思路实现的完整工程实践界面。公开仓库现在同时提供独立实现的 Flow 编排器，可编辑场景、步骤、定位策略和多个校验点，并直接调用公开版 Runner；截图中的真实设备投屏、元素采集和录屏仍属于工程实践版本。
 
 ### PC 元素采集
 
@@ -65,8 +65,7 @@ PC 端通过 CDP 连接桌面应用或浏览器，按目标技术条件选择视
 - ADB Android 与 WDA iOS 基础驱动接口
 - 失败截图和 JSON 结果产物
 - 可直接运行的 Notes Web 示例应用
-
-> 当前公开仓库的重点是 Flow 协议和执行内核。截图中的完整拖拽式编排器、设备画面投屏及录制属于工程实践版本，并未作为公开仓库的开箱即用功能提供。
+- 可直接运行的浏览器编排器，支持步骤增删改、多个预期、JSON 编辑、撤销/重做、保存和模拟执行
 
 ## 架构
 
@@ -94,6 +93,17 @@ flowchart LR
 PYTHONPATH=src python -m test_studio.cli run examples/create-note.flow.json
 ```
 
+启动可视化编排器：
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+test-studio serve --flow examples/create-note.flow.json
+```
+
+打开 `http://127.0.0.1:4174`。页面修改会保存回传入的 Flow 文件，“运行”使用同一套 Python `FlowRunner` 和确定性模拟 Driver，不是静态界面演示。
+
 运行真实桌面端示例：
 
 ```bash
@@ -116,7 +126,7 @@ Android 和 iOS 分别通过 `--driver adb`、`--driver wda` 选择驱动，设�
 
 ## English summary
 
-Cross-platform Test Studio provides a versionable Flow v1 contract and deterministic runner shared by desktop, Android, and iOS automation. It supports multiple assertions per action, explicit selector fallbacks, simulation and platform drivers, and failure evidence. The current public version focuses on the execution core rather than a full visual authoring product.
+Cross-platform Test Studio provides a versionable Flow v1 contract, a deterministic runner, and a runnable visual authoring workspace shared by desktop, Android, and iOS automation. It supports multiple assertions per action, explicit selector fallbacks, simulation and platform drivers, and failure evidence.
 
 ## License
 
