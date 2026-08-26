@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test Studio Notes Demo</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f7fa; color: #182230; }
+    main { max-width: 760px; margin: 56px auto; padding: 0 24px; }
+    h1 { font-size: 30px; margin: 0 0 8px; letter-spacing: 0; }
+    p { color: #536273; }
+    form { margin-top: 28px; background: white; border: 1px solid #dfe5ec; padding: 24px; box-shadow: 0 8px 28px rgb(20 40 70 / 7%); }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input, textarea { width: 100%; border: 1px solid #bdc7d4; padding: 11px 12px; font: inherit; margin-bottom: 18px; }
+    textarea { min-height: 140px; resize: vertical; }
+    button { border: 0; background: #1267d6; color: white; padding: 11px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+    #saved-status { display: inline-block; margin-left: 12px; color: #137a49; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Notes demo</h1>
+    <p>A synthetic application for public automation examples.</p>
+    <form id="note-form">
+      <label for="title">Title</label>
+      <input id="title" data-testid="title" aria-label="note-title">
+      <label for="body">Body</label>
+      <textarea id="body" data-testid="body"></textarea>
+      <button type="submit" data-testid="save">Save</button>
+      <span id="saved-status" data-testid="saved-status" hidden>Saved</span>
+    </form>
+  </main>
+  <script>
+    document.querySelector('#note-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      localStorage.setItem('demo-note', JSON.stringify({
+        title: document.querySelector('#title').value,
+        body: document.querySelector('#body').value,
+      }));
+      document.querySelector('#saved-status').hidden = false;
+    });
+  </script>
+</body>
+</html>
+

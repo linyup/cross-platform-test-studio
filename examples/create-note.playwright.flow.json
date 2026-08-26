@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "id": "create-note-playwright",
+  "title": "Create and save a note in the public web demo",
+  "platform": "desktop",
+  "tags": ["smoke", "demo"],
+  "steps": [
+    {"id": "launch", "title": "Open the demo", "action": "launch"},
+    {
+      "id": "enter-title",
+      "title": "Enter a title",
+      "action": "type",
+      "selector": {"strategy": "test_id", "value": "title"},
+      "input": "Public demo note",
+      "assertions": [{"kind": "value_equals", "selector": {"strategy": "test_id", "value": "title"}, "expected": "Public demo note"}]
+    },
+    {
+      "id": "save",
+      "title": "Save the note",
+      "action": "tap",
+      "selector": {"strategy": "test_id", "value": "save"},
+      "assertions": [{"kind": "text_equals", "selector": {"strategy": "test_id", "value": "saved-status"}, "expected": "Saved"}]
+    }
+  ]
+}
+

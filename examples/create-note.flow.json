@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "id": "create-note",
+  "title": "Create and save a note",
+  "platform": "any",
+  "tags": ["smoke", "demo"],
+  "variables": {},
+  "steps": [
+    {
+      "id": "launch",
+      "title": "Launch the application",
+      "action": "launch"
+    },
+    {
+      "id": "enter-title",
+      "title": "Enter a note title",
+      "action": "type",
+      "selector": {
+        "strategy": "test_id",
+        "value": "title",
+        "alternatives": [{"strategy": "accessibility", "value": "note-title"}]
+      },
+      "input": "Public demo note",
+      "assertions": [
+        {
+          "kind": "value_equals",
+          "selector": {"strategy": "test_id", "value": "title"},
+          "expected": "Public demo note"
+        }
+      ]
+    },
+    {
+      "id": "save",
+      "title": "Save the note",
+      "action": "tap",
+      "selector": {"strategy": "role", "value": "save"},
+      "assertions": [
+        {
+          "kind": "text_equals",
+          "selector": {"strategy": "test_id", "value": "saved-status"},
+          "expected": "Saved"
+        }
+      ]
+    }
+  ]
+}
+
