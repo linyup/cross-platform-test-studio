@@ -28,12 +28,20 @@
 
 ## 架构
 
-```text
-Flow JSON → 校验 → FlowRunner → Driver
-                              ├─ Simulation
-                              ├─ Playwright / CDP
-                              ├─ ADB / Android
-                              └─ WDA / iOS
+```mermaid
+flowchart LR
+    A["Portable Flow v1<br/>JSON 资产"] --> B["模型校验与标准化"]
+    B --> C["FlowRunner<br/>步骤、断言、失败策略"]
+    C --> D{"Driver Contract"}
+    D --> E["Simulation<br/>CI 与协议测试"]
+    D --> F["Playwright / CDP<br/>桌面端"]
+    D --> G["ADB / UI Hierarchy<br/>Android"]
+    D --> H["WDA / Accessibility<br/>iOS"]
+    E --> I["统一执行结果"]
+    F --> I
+    G --> I
+    H --> I
+    I --> J["截图、错误与步骤证据"]
 ```
 
 ## 快速开始
