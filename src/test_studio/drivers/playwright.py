@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -83,9 +84,29 @@ class PlaywrightDriver(Driver):
         return {"driver": self.name, "goal": goal, "url": self._active_page().url, "elements": elements, "warnings": []}
 
     def snapshot(self, include_image: bool = False) -> dict[str, Any]:
-        payload = super().snapshot(False)
+        page = self._active_page()
+        inspection = self.inspect()
+        try:
+            visible_text = " ".join(page.locator("body").inner_text(timeout=3000).split())[:50_000]
+        except Exception:
+            visible_text = ""
+        state = {
+            "url": page.url,
+            "title": page.title(),
+            "visible_text": visible_text,
+            "elements": inspection.get("elements", []),
+        }
+        fingerprint = hashlib.sha256(
+            json.dumps(state, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest()[:20]
+        payload = {
+            **inspection,
+            "page_fingerprint": fingerprint,
+            "image_base64": None,
+            "image_included": False,
+        }
         if include_image:
-            payload["image_base64"] = base64.b64encode(self._active_page().screenshot()).decode("ascii")
+            payload["image_base64"] = base64.b64encode(page.screenshot()).decode("ascii")
             payload["image_included"] = True
         return payload
 
