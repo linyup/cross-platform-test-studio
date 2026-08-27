@@ -11,18 +11,31 @@ from ..models import Assertion, FlowStep, Selector
 class PlaywrightDriver(Driver):
     name = "playwright"
 
-    def __init__(self, base_url: str, headless: bool = True) -> None:
+    def __init__(self, base_url: str, headless: bool = True, cdp_url: str | None = None) -> None:
         try:
             from playwright.sync_api import sync_playwright
         except ImportError as error:
             raise RuntimeError("install the desktop extra: pip install '.[desktop]' && playwright install chromium") from error
         self.base_url = base_url
         self._runtime = sync_playwright().start()
-        self._browser = self._runtime.chromium.launch(headless=headless)
-        self.page = self._browser.new_page()
+        self._cdp_url = cdp_url
+        self._browser = self._runtime.chromium.connect_over_cdp(cdp_url) if cdp_url else self._runtime.chromium.launch(headless=headless)
+        self.page = self._select_page() if cdp_url else self._browser.new_page()
+
+    def _select_page(self):
+        pages = [page for context in self._browser.contexts for page in context.pages if not page.is_closed()]
+        if not pages:
+            raise RuntimeError("CDP connected but no live page is available")
+        return max(pages, key=lambda page: len(page.url or ""))
+
+    def _active_page(self):
+        if self.page.is_closed():
+            self.page = self._select_page()
+        return self.page
 
     def close(self) -> None:
-        self._browser.close()
+        if not self._cdp_url:
+            self._browser.close()
         self._runtime.stop()
 
     def _locator(self, selector: Selector):
@@ -30,22 +43,24 @@ class PlaywrightDriver(Driver):
         for candidate in (selector, *selector.alternatives):
             try:
                 if candidate.strategy == "test_id":
-                    locator = self.page.get_by_test_id(candidate.value)
+                    locator = self._active_page().get_by_test_id(candidate.value)
                 elif candidate.strategy == "role":
-                    locator = self.page.get_by_role(candidate.value)
+                    locator = self._active_page().get_by_role(candidate.value)
                 elif candidate.strategy == "text":
-                    locator = self.page.get_by_text(candidate.value, exact=True)
+                    locator = self._active_page().get_by_text(candidate.value, exact=True)
                 elif candidate.strategy == "css":
-                    locator = self.page.locator(candidate.value)
+                    locator = self._active_page().locator(candidate.value)
                 elif candidate.strategy == "xpath":
-                    locator = self.page.locator(f"xpath={candidate.value}")
+                    locator = self._active_page().locator(f"xpath={candidate.value}")
                 elif candidate.strategy == "accessibility":
-                    locator = self.page.get_by_label(candidate.value)
+                    locator = self._active_page().get_by_label(candidate.value)
                 else:
                     failures.append(f"unsupported by Playwright: {candidate.strategy}")
                     continue
-                if locator.count() > 0:
-                    return locator.first
+                for index in range(locator.count()):
+                    match = locator.nth(index)
+                    if match.is_visible():
+                        return match
             except Exception as error:
                 failures.append(str(error))
         raise LookupError(f"no selector matched: {selector}; failures={failures}")
@@ -105,4 +120,3 @@ class PlaywrightDriver(Driver):
         dom.write_text(self.page.content(), encoding="utf-8")
         details.write_text(json.dumps({"error": f"{type(error).__name__}: {error}"}, indent=2), encoding="utf-8")
         return [Evidence("screenshot", str(screenshot)), Evidence("dom", str(dom)), Evidence("error", str(details))]
-

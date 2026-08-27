@@ -17,7 +17,7 @@ STATIC = Path(__file__).resolve().parent / "static"
 
 def create_handler(flow_path: Path):
     class StudioHandler(BaseHTTPRequestHandler):
-        server_version = "TestStudio/0.2"
+        server_version = "TestStudio/0.3"
 
         def _json(self, status: int, payload: object) -> None:
             body = json.dumps(payload, ensure_ascii=False).encode()

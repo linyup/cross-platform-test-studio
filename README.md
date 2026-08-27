@@ -58,6 +58,13 @@ PC 端通过 CDP 连接桌面应用或浏览器，按目标技术条件选择视
 
 ## 当前已实现
 
+- CDP attach 模式：连接已有 Chromium/Electron，不关闭宿主应用；renderer 重载后自动选择新的活动 page
+- DOM 可见节点优先：忽略隐藏的同文案副本，减少无必要的视觉降级
+- Android/iOS/桌面统一 Flow v1 与确定性 Runner
+- `ExplorationSession` 结构化记录命令成功、证据成功、页面变化和断言结果
+- 探索轨迹可丢弃失败步骤并编译成 `draft + needs-review` Flow
+- 副作用幂等键与 Cleanup 转正门禁，避免探索重试造成重复写入
+
 - Portable Flow v1 数据模型、校验和命令行入口
 - 通用 `FlowRunner`，支持执行、断言、失败策略和取消检查
 - 一个操作对应多个断言

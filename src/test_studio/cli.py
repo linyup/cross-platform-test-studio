@@ -15,7 +15,7 @@ def create_driver(args):
     if args.driver == "playwright":
         from .drivers.playwright import PlaywrightDriver
 
-        return PlaywrightDriver(args.base_url, headless=not args.headed)
+        return PlaywrightDriver(args.base_url, headless=not args.headed, cdp_url=args.cdp_url)
     if args.driver == "adb":
         from .drivers.adb import AdbDriver
 
@@ -41,6 +41,7 @@ def main() -> int:
     run_parser.add_argument("--driver", choices=("simulated", "playwright", "adb", "wda"), default="simulated")
     run_parser.add_argument("--base-url", default="http://127.0.0.1:4173")
     run_parser.add_argument("--headed", action="store_true")
+    run_parser.add_argument("--cdp-url", help="attach to an existing Chromium/Electron CDP endpoint")
     run_parser.add_argument("--serial")
     run_parser.add_argument("--package")
     run_parser.add_argument("--wda-url", default="http://127.0.0.1:8100")
