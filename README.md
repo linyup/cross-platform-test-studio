@@ -96,6 +96,21 @@ flowchart LR
 
 ## 快速开始
 
+### MCP for Codex and other agents
+
+```bash
+pip install -e '.[mcp]'
+test-studio-mcp --driver simulated --transport stdio
+```
+
+The same adapter supports `sse` and `streamable-http`. Available tools:
+
+`test_get_status`, `test_inspect`, `test_snapshot`, `test_compare_state`, `test_create_trace`, `test_perform`, `test_assert`, `test_run_journey`, `test_get_trace`, `test_complete_trace`, `test_discard_trace_step`, `test_compile_flow_draft`.
+
+MCP is an optional transport over the same Driver and exploration contracts. CLI and deterministic Flow execution remain available without the MCP dependency.
+
+See [MCP integration and tool lifecycle](docs/MCP.md) for architecture boundaries, state fingerprints and trace promotion.
+
 运行不依赖浏览器和设备的模拟示例：
 
 ```bash

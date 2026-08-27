@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 from pathlib import Path
 from typing import Any
@@ -67,6 +68,26 @@ class PlaywrightDriver(Driver):
 
     def resolve(self, selector: Selector) -> str:
         return str(self._locator(selector))
+
+    def status(self) -> dict[str, Any]:
+        page = self._active_page()
+        return {"ready": True, "driver": self.name, "url": page.url, "cdp": bool(self._cdp_url)}
+
+    def inspect(self, goal: str = "") -> dict[str, Any]:
+        elements = self._active_page().locator("button, input, textarea, select, a, [role], [data-testid]").evaluate_all(
+            """nodes => nodes.filter(n => { const r=n.getBoundingClientRect(); return r.width>0 && r.height>0; }).slice(0,200).map(n => ({
+              tag:n.tagName.toLowerCase(), role:n.getAttribute('role')||'', test_id:n.getAttribute('data-testid')||'',
+              label:n.getAttribute('aria-label')||'', text:(n.innerText||n.value||'').trim().slice(0,160)
+            }))"""
+        )
+        return {"driver": self.name, "goal": goal, "url": self._active_page().url, "elements": elements, "warnings": []}
+
+    def snapshot(self, include_image: bool = False) -> dict[str, Any]:
+        payload = super().snapshot(False)
+        if include_image:
+            payload["image_base64"] = base64.b64encode(self._active_page().screenshot()).decode("ascii")
+            payload["image_included"] = True
+        return payload
 
     def perform(self, step: FlowStep, variables: dict[str, Any]) -> None:
         if step.action == "launch":

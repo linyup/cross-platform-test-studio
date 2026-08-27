@@ -28,6 +28,14 @@ class SimulatedDriver(Driver):
                 return candidate.value
         raise LookupError(f"element not found: {selector.strategy}={selector.value}")
 
+    def inspect(self, goal: str = "") -> dict[str, Any]:
+        return {
+            "driver": self.name,
+            "goal": goal,
+            "elements": [{"strategy": "test_id", "value": key, **value} for key, value in self.elements.items()],
+            "warnings": [],
+        }
+
     def perform(self, step: FlowStep, variables: dict[str, Any]) -> None:
         if step.action == "launch":
             self.running = True
@@ -70,4 +78,3 @@ class SimulatedDriver(Driver):
         state_path = directory / f"{step.id}-state.json"
         state_path.write_text(json.dumps(self.elements, indent=2), encoding="utf-8")
         return [Evidence(kind="state", path=str(state_path))]
-

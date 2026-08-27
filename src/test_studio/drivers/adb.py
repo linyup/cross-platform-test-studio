@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -47,6 +48,26 @@ class AdbDriver(Driver):
 
     def resolve(self, selector: Selector) -> str:
         return self._node(selector).attrib.get("bounds", "")
+
+    def status(self) -> dict[str, Any]:
+        state = str(self._adb("get-state")).strip()
+        return {"ready": state == "device", "driver": self.name, "serial": self.serial}
+
+    def inspect(self, goal: str = "") -> dict[str, Any]:
+        elements = []
+        for node in self._hierarchy().iter("node"):
+            attrs = node.attrib
+            if attrs.get("text") or attrs.get("content-desc") or attrs.get("resource-id"):
+                elements.append({key: attrs.get(key, "") for key in ("text", "content-desc", "resource-id", "class", "bounds", "clickable")})
+        return {"driver": self.name, "goal": goal, "elements": elements[:300], "warnings": []}
+
+    def snapshot(self, include_image: bool = False) -> dict[str, Any]:
+        payload = super().snapshot(False)
+        if include_image:
+            image = self._adb("exec-out", "screencap", "-p", binary=True)
+            payload["image_base64"] = base64.b64encode(image).decode("ascii")
+            payload["image_included"] = True
+        return payload
 
     def perform(self, step: FlowStep, variables: dict[str, Any]) -> None:
         if step.action == "launch":
@@ -96,4 +117,3 @@ class AdbDriver(Driver):
         self._adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
         hierarchy.write_text(self._adb("shell", "cat", "/sdcard/window.xml"), encoding="utf-8")
         return [Evidence("screenshot", str(screenshot)), Evidence("hierarchy", str(hierarchy))]
-

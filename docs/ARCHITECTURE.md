@@ -2,7 +2,8 @@
 
 ```mermaid
 flowchart LR
-    S["Skill / Agent"] --> E["ExplorationSession"]
+    S["Skill / Agent"] --> M["Optional MCP / CLI adapter"]
+    M --> E["ExplorationSession"]
     E --> D["Desktop CDP / Android ADB / iOS WDA"]
     D --> R["Structured ToolResult + evidence"]
     R --> T["Reviewable trace"]
@@ -13,6 +14,8 @@ flowchart LR
 ```
 
 Exploration and regression are separate execution modes. Exploration may use adaptive discovery; committed regression never invokes an LLM or silently rewrites selectors.
+
+MCP is a transport adapter, not a second automation engine. It exposes the same Driver and `ExplorationSession` contracts used by CLI authoring, while HTTP remains the boundary for remote device scheduling and authentication. See [MCP.md](MCP.md).
 
 The studio separates portable assets, execution policy and platform mechanics.
 

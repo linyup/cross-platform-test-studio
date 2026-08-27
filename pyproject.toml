@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cross-platform-test-studio"
-version = "0.3.0"
+version = "0.4.0"
 description = "Portable flow model and deterministic cross-platform test runner"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -13,10 +13,12 @@ dependencies = []
 
 [project.optional-dependencies]
 desktop = ["playwright>=1.45,<2"]
+mcp = ["mcp>=1.10,<2"]
 dev = ["pytest>=8,<9"]
 
 [project.scripts]
 test-studio = "test_studio.cli:main"
+test-studio-mcp = "test_studio.mcp_cli:main"
 
 
 [tool.setuptools.packages.find]

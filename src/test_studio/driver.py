@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +21,21 @@ class Driver(ABC):
 
     name = "abstract"
 
+    def status(self) -> dict[str, Any]:
+        return {"ready": True, "driver": self.name}
+
+    def inspect(self, goal: str = "") -> dict[str, Any]:
+        return {"driver": self.name, "goal": goal, "elements": [], "warnings": ["driver does not expose inspection"]}
+
+    def snapshot(self, include_image: bool = False) -> dict[str, Any]:
+        inspection = self.inspect()
+        fingerprint = hashlib.sha256(json.dumps(inspection, sort_keys=True, default=str).encode()).hexdigest()[:20]
+        return {**inspection, "page_fingerprint": fingerprint, "image_base64": None, "image_included": False}
+
+    def compare_state(self, page_fingerprint: str) -> dict[str, Any]:
+        current = self.snapshot(False)["page_fingerprint"]
+        return {"previous": page_fingerprint, "current": current, "changed": current != page_fingerprint}
+
     @abstractmethod
     def perform(self, step: FlowStep, variables: dict[str, Any]) -> None:
         raise NotImplementedError
@@ -35,4 +52,3 @@ class Driver(ABC):
     def resolve(self, selector: Selector) -> str:
         """Return the resolved selector description, trying declared alternatives in order."""
         raise NotImplementedError
-
